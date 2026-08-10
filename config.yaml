@@ -1,0 +1,20 @@
+# IceTurn Configuration
+
+realm: iceturn.local
+
+# Listening addresses
+listen_udp: ":3478"
+listen_tcp: ":3478"
+
+# Public IP for relay address
+public_ip: "192.168.1.100"
+
+# STUN packet buffering timeout
+stun_pending_timeout: 30s
+
+# Authentication credentials
+credentials:
+  streamer-1: "password1"
+  streamer-2: "password2"
+  client-1: "password3"
+  client-2: "password4"
