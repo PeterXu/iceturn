@@ -2,45 +2,39 @@ package config
 
 import (
 	"fmt"
+	"net"
 	"os"
-	"strconv"
 	"strings"
-	"time"
 )
 
-// Config represents the IceTurn server configuration
+// Config represents the TURN server configuration
 type Config struct {
 	// Realm for TURN authentication
-	Realm string `yaml:"realm"`
+	Realm string
 
 	// Listener addresses
-	ListenUDP string `yaml:"listen_udp"`
-	ListenTCP string `yaml:"listen_tcp"`
+	ListenUDP string
+	ListenTCP string
 
 	// Public IP for relay address
-	PublicIP string `yaml:"public_ip"`
-
-	// STUN packet buffering timeout
-	STUNPendingTimeout time.Duration `yaml:"stun_pending_timeout"`
+	PublicIP string
 
 	// Authentication credentials
-	Credentials map[string]string `yaml:"credentials"` // username -> password
+	Credentials map[string]string // username -> password
 }
 
 // DefaultConfig returns a default configuration
 func DefaultConfig() *Config {
 	return &Config{
-		Realm:              "iceturn.local",
-		ListenUDP:          ":3478",
-		ListenTCP:          ":3478",
-		PublicIP:           "127.0.0.1",
-		STUNPendingTimeout: 30 * time.Second,
-		Credentials:        make(map[string]string),
+		Realm:       "iceturn.local",
+		ListenUDP:   ":3478",
+		ListenTCP:   ":3478",
+		PublicIP:    "127.0.0.1",
+		Credentials: make(map[string]string),
 	}
 }
 
 // LoadFromEnv loads configuration from environment variables
-// Environment variables override config file values
 func (c *Config) LoadFromEnv() {
 	if realm := os.Getenv("REALM"); realm != "" {
 		c.Realm = realm
@@ -56,12 +50,6 @@ func (c *Config) LoadFromEnv() {
 
 	if listenTCP := os.Getenv("LISTEN_TCP"); listenTCP != "" {
 		c.ListenTCP = listenTCP
-	}
-
-	if timeout := os.Getenv("STUN_PENDING_TIMEOUT"); timeout != "" {
-		if duration, err := time.ParseDuration(timeout); err == nil {
-			c.STUNPendingTimeout = duration
-		}
 	}
 
 	// Load credentials from environment
@@ -92,27 +80,15 @@ func (c *Config) Validate() error {
 		return fmt.Errorf("public_ip cannot be empty")
 	}
 
-	if c.STUNPendingTimeout < 1*time.Second {
-		return fmt.Errorf("stun_pending_timeout must be at least 1 second")
+	if net.ParseIP(c.PublicIP) == nil {
+		return fmt.Errorf("invalid public_ip: %s", c.PublicIP)
 	}
 
 	return nil
 }
 
-// GetPort extracts port number from address string
-func (c *Config) GetPort(addr string) int {
-	// Extract port from ":3478" or "0.0.0.0:3478"
-	for i := len(addr) - 1; i >= 0; i-- {
-		if addr[i] == ':' {
-			port, _ := strconv.Atoi(addr[i+1:])
-			return port
-		}
-	}
-	return 0
-}
-
 // String returns a string representation of the config
 func (c *Config) String() string {
-	return fmt.Sprintf("Config{Realm=%s, PublicIP=%s, ListenUDP=%s, ListenTCP=%s, Timeout=%v, Credentials=%d}",
-		c.Realm, c.PublicIP, c.ListenUDP, c.ListenTCP, c.STUNPendingTimeout, len(c.Credentials))
+	return fmt.Sprintf("Config{Realm=%s, PublicIP=%s, ListenUDP=%s, ListenTCP=%s, Credentials=%d}",
+		c.Realm, c.PublicIP, c.ListenUDP, c.ListenTCP, len(c.Credentials))
 }
