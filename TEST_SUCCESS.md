@@ -7,7 +7,6 @@ Date: 2026-08-10
 ### Test Environment
 
 - **IceTurn:** 127.0.0.1:3478 (single port)
-- **Magpie:** http://127.0.0.1:8080
 - **Browser:** Chrome/Safari/Firefox (ICE Full mode)
 - **Protocol:** Standard TURN + STUN + WebRTC
 

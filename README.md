@@ -26,7 +26,6 @@ IceTurn is a modified TURN server based on pion/turn that supports:
 - [x] STUN packet interception (wrapper)
 - [x] Server integration
 - [x] Unit tests
-- [x] Integration tested with Magpie
 - [x] Docker support
 
 ### Pending
@@ -94,11 +93,11 @@ pion/turn Server (normal TURN processing)
 PUBLIC_IP=192.168.1.100
 
 # Optional
-REALM=magpie.local
+REALM=iceturn.local
 STUN_PENDING_TIMEOUT=30s
 
 # Credentials
-TURN_USER_magpie=magpie
+TURN_CREDENTIALS=iceturn:iceturn
 ```
 
 ### Configuration File
@@ -136,4 +135,3 @@ iceturn/
 - ✅ Chrome (latest)
 - ✅ Firefox (latest)
 - ✅ Safari (latest)
-- ✅ Magpie remote browser service

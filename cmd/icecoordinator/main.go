@@ -17,9 +17,9 @@ func main() {
 	// Load from environment variables (overrides defaults)
 	cfg.LoadFromEnv()
 
-	// Add default credentials for magpie if not set
+	// Add default credentials if not set
 	if len(cfg.Credentials) == 0 {
-		cfg.Credentials["magpie"] = "magpie"
+		cfg.Credentials["iceturn"] = "iceturn"
 	}
 
 	// Validate configuration

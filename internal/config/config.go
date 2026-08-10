@@ -30,7 +30,7 @@ type Config struct {
 // DefaultConfig returns a default configuration
 func DefaultConfig() *Config {
 	return &Config{
-		Realm:              "magpie.local",
+		Realm:              "iceturn.local",
 		ListenUDP:          ":3478",
 		ListenTCP:          ":3478",
 		PublicIP:           "127.0.0.1",

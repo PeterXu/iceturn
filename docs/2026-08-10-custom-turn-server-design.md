@@ -322,7 +322,7 @@ No browser modifications needed
 
 ```yaml
 # config.yaml
-realm: magpie.local
+realm: iceturn.local
 
 # Single port listening
 listen_udp: 3478

@@ -1,6 +1,6 @@
 # IceTurn Configuration
 
-realm: magpie.local
+realm: iceturn.local
 
 # Listening addresses
 listen_udp: ":3478"
@@ -12,10 +12,6 @@ public_ip: "127.0.0.1"
 # STUN packet buffering timeout
 stun_pending_timeout: 30s
 
-# Authentication credentials (match magpie defaults)
+# Authentication credentials (defaults)
 credentials:
-  magpie: "magpie"
-  streamer-1: "password1"
-  streamer-2: "password2"
-  client-1: "password3"
-  client-2: "password4"
+  iceturn: "iceturn"
