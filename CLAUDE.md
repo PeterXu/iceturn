@@ -62,11 +62,13 @@ IceTurn Server (modified pion/turn)
 
 | Path | Role |
 |---|---|
-| `cmd/icecoordinator/main.go` | Entry point. Starts TURN server, integrates STUN parsing and pairing logic. |
-| `internal/config/config.go` | Configuration management. Default config and validation. |
+| `cmd/icecoordinator/main.go` | Entry point. Creates IceTurnServer and starts server. |
+| `internal/server/server.go` | IceTurn server wrapper. Integrates STUN interception with pion/turn. Handles STUN Binding Request. |
+| `internal/stunparse/intercept.go` | STUN packet interception wrapper. Intercepts ReadFrom calls to process STUN messages. |
 | `internal/stunparse/stunparse.go` | STUN Binding Request parser. Extracts ice-ufrag from USERNAME attribute. |
 | `internal/allocation/manager.go` | Manages ice-ufrag → Allocation mappings and pairing state. |
 | `internal/pending/pending.go` | Buffers STUN packets until pairing is established. Includes timeout cleanup. |
+| `internal/config/config.go` | Configuration management. Default config and validation. |
 
 ## Key types
 
@@ -102,26 +104,30 @@ type Manager struct {
 - [x] STUN packet buffering manager
 - [x] Pairing logic
 - [x] Cleanup routines
+- [x] **STUN packet interception wrapper**
+- [x] **IceTurn server integration**
+- [x] **Connection tracking**
+- [x] **Unit tests**
 
 ### ⚠️ Pending integration
 
-- [ ] **Integrate STUN interception into pion/turn data flow**
-  - Need to intercept incoming STUN packets
-  - Parse and register ice-ufrag
-  - Buffer or forward based on pairing state
-  
-- [ ] **Implement allocation lookup**
-  - Map connection address to Allocation
-  - Required for registering ice-ufrag mapping
+- [ ] **Test with real WebRTC browsers**
+  - Need to verify STUN interception works correctly
+  - Test pairing establishment with real browsers
+  - Verify data forwarding
 
-- [ ] **Data forwarding based on pairing**
-  - Intercept outgoing data
-  - Look up paired allocation
-  - Forward to correct destination
+- [ ] **Improve allocation tracking**
+  - Hook into pion/turn allocation events
+  - Register allocation when created
+  - Remove allocation when closed
+
+- [ ] **Data forwarding optimization**
+  - Verify forwarding based on pairing works
+  - Handle edge cases (allocation close, timeout, etc.)
 
 ### 🧪 Testing needed
 
-- [ ] Unit tests for each component
+- [x] Unit tests for each component
 - [ ] Integration test: single client-streamer pair
 - [ ] Integration test: multiple client-streamer pairs
 - [ ] Compatibility test with real WebRTC browsers
@@ -190,21 +196,46 @@ credentials:
   client-1: "password2"
 ```
 
-## Key implementation challenge
+## Key implementation: STUN packet interception
 
-**How to intercept STUN packets in pion/turn?**
+**Solution: Wrap PacketConn**
 
-Current pion/turn architecture:
-- `turn.Server` handles all TURN protocol
-- `server.HandleRequest()` processes incoming packets
-- Need to modify or wrap the packet handling logic
+We implemented a `STUNInterceptConn` wrapper (in `internal/stunparse/intercept.go`) that:
 
-Possible approaches:
-1. **Wrap PacketConn**: Intercept packets before they reach pion/turn
-2. **Modify pion/turn**: Fork and modify internal server logic
-3. **Event handler hook**: Use pion/turn's EventHandler (if available)
+1. Wraps the underlying `net.PacketConn`
+2. Intercepts `ReadFrom()` calls
+3. Checks if incoming data is a STUN message
+4. Calls `stunHandler` callback for STUN packets
+5. Processes or forwards the packet
 
-**Current approach:** See `handleSTUNPacket()` in `cmd/icecoordinator/main.go` (placeholder, needs integration)
+**Integration flow:**
+
+```
+UDP/TCP Listener
+      ↓
+STUNInterceptConn (wrapper)
+      ↓ (intercepts ReadFrom)
+IsSTUNMessage?
+  Yes → handleSTUNPacket()
+         ├─ ParseBindingRequest()
+         ├─ Register ice-ufrag
+         ├─ TryEstablishPair()
+         └─ Buffer if needed
+  No  → Forward to pion/turn
+      ↓
+pion/turn Server (normal processing)
+```
+
+**Code location:**
+- Wrapper: `internal/stunparse/intercept.go`
+- Handler: `internal/server/server.go:handleSTUNPacket()`
+- Integration: `internal/server/server.go:createTURNServer()`
+
+**Benefits:**
+- ✅ No modification to pion/turn internals
+- ✅ Clean separation of concerns
+- ✅ Easy to test and debug
+- ✅ Can disable interception if needed
 
 ## Dependencies
 
