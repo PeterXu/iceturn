@@ -28,3 +28,10 @@ vendor/
 
 # Build
 dist/
+
+# Logs
+logs/
+*.log
+
+# Docker
+.env.docker

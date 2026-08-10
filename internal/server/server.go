@@ -118,12 +118,12 @@ func (s *IceTurnServer) createTURNServer() (*turn.Server, error) {
 	// Create TURN server
 	turnServer, err := turn.NewServer(turn.ServerConfig{
 		Realm: s.config.Realm,
-		AuthHandler: func(username string, realm string, srcAddr net.Addr) (string, []byte, bool) {
-			password, ok := s.config.Credentials[username]
+		AuthHandler: func(ra *turn.RequestAttributes) (string, []byte, bool) {
+			password, ok := s.config.Credentials[ra.Username]
 			if !ok {
 				return "", nil, false
 			}
-			return username, turn.GenerateAuthKey(username, realm, password), true
+			return ra.Username, turn.GenerateAuthKey(ra.Username, ra.Realm, password), true
 		},
 		PacketConnConfigs: []turn.PacketConnConfig{
 			{

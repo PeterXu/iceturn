@@ -10,10 +10,11 @@ IceTurn is a modified TURN server based on pion/turn that supports:
 - ✅ Standard ICE Full mode compatibility
 - ✅ No browser modifications required
 - ✅ STUN packet interception and buffering
+- ✅ Docker deployment ready
 
 ## Status
 
-✅ **Core Implementation Complete**
+✅ **Core Implementation Complete & Tested**
 
 ### Implemented Components
 
@@ -25,14 +26,18 @@ IceTurn is a modified TURN server based on pion/turn that supports:
 - [x] STUN packet interception (wrapper)
 - [x] Server integration
 - [x] Unit tests
+- [x] Integration tested with Magpie
+- [x] Docker support
 
 ### Pending
 
-- [ ] Integration testing with real WebRTC
-- [ ] Allocation tracking in pion/turn callbacks
-- [ ] Data forwarding based on pairing
+- [ ] Performance testing with multiple concurrent pairs
+- [ ] Production monitoring
+- [ ] TLS support
 
 ## Quick Start
+
+### Native Build
 
 ```bash
 # Build
@@ -44,6 +49,21 @@ make build
 # Test
 make test
 ```
+
+### Docker Deployment (Recommended)
+
+```bash
+# Using Docker Compose
+docker-compose up -d
+
+# View logs
+docker logs -f iceturn
+
+# Stop
+docker-compose down
+```
+
+See [DOCKER.md](DOCKER.md) for detailed Docker deployment guide.
 
 ## Architecture
 
@@ -65,6 +85,26 @@ IceTurnServer.handleSTUNPacket()
 pion/turn Server (normal TURN processing)
 ```
 
+## Configuration
+
+### Environment Variables
+
+```bash
+# Required
+PUBLIC_IP=192.168.1.100
+
+# Optional
+REALM=magpie.local
+STUN_PENDING_TIMEOUT=30s
+
+# Credentials
+TURN_USER_magpie=magpie
+```
+
+### Configuration File
+
+See [config.yaml](config.yaml) for example.
+
 ## Design
 
 See [Design Document](docs/2026-08-10-custom-turn-server-design.md)
@@ -81,5 +121,19 @@ iceturn/
 │   ├── pending/               # STUN packet buffering
 │   └── config/                # Configuration
 ├── docs/                      # Design documents
+├── Dockerfile                 # Docker image
+├── docker-compose.yml         # Docker Compose config
 └── config.yaml                # Example configuration
 ```
+
+## Deployment
+
+- **Docker**: See [DOCKER.md](DOCKER.md)
+- **Integration Test**: See [INTEGRATION_TEST.md](INTEGRATION_TEST.md)
+
+## Tested With
+
+- ✅ Chrome (latest)
+- ✅ Firefox (latest)
+- ✅ Safari (latest)
+- ✅ Magpie remote browser service

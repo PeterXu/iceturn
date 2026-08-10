@@ -40,9 +40,9 @@ type Manager struct {
 // NewManager creates a new allocation manager
 func NewManager() *Manager {
 	return &Manager{
-		iceUfragMap:  make(map[string]*allocation.Allocation),
+		iceUfragMap:  make(map[string]*Allocation),
 		pairMap:      make(map[string]*PairState),
-		allocToUfrag: make(map[*allocation.Allocation]string),
+		allocToUfrag: make(map[*Allocation]string),
 	}
 }
 
