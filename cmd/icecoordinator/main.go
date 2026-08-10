@@ -7,13 +7,12 @@ import (
 	"os/signal"
 	"syscall"
 
-	"github.com/peter/iceturn/internal/config"
 	"github.com/pion/turn/v5"
 )
 
 func main() {
 	// Load configuration
-	cfg := config.DefaultConfig()
+	cfg := DefaultConfig()
 	cfg.LoadFromEnv()
 
 	// Add default credentials if not set
